@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import xml.etree.ElementTree as ET
 
@@ -27,3 +28,9 @@ def store_uploaded_app(app_id, app_name):
         os.makedirs(dirname)
         
     execute_cmd("echo '{}' >> {}".format(app_id, filename))
+
+def get_connected_tv_ip_port():
+    out, err = execute_cmd("~/tizen-studio/tools/sdb devices")
+    match = re.match("List of devices attached \n(\S+\.\S+\.\S+\.\S+:\S+)", out)
+    if match:
+        return match.groups()[0].split(":")

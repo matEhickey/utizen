@@ -3,7 +3,8 @@
 import os
 import json
 import click
-from src.utizen import run
+from src.utizen import run, execute_cmd
+from src.utils import get_connected_tv_ip_port
 from pprint import pformat
 
 @click.command()
@@ -40,11 +41,11 @@ def uninstall(config):
 @click.option('--name', prompt='App name (camelCaseWithoutSymbols)', help='The name of the app (camelCaseWithoutSymbols)')
 @click.option('--shortcut', prompt= 'Project Shortcut (ex: refapp/2016)', help='The project shortcut, ex: refapp/2016, will store the config into configs/refapp/2016.json')
 @click.option('--app_path', default= '.', help='The path of the app')
-@click.option('--ip', prompt='TV IP', help='The tv IP, ex: 110.111.112.113')
-@click.option('--port', default="26101", help='The tv port, default: 26101')
 @click.option('--debug', default="WITH_TIMEOUT", help='The tv debug mode, default: WITH_TIMEOUT, options: [WITH_TIMEOUT, WITHOUT_TIMEOUT, NO_DEBUG]')
-def create(name, shortcut, app_path, ip, port, debug):
+def create(name, shortcut, app_path, debug):
     path = os.path.abspath(os.path.join(os.getcwd(), app_path))
+    
+    ip, port = get_connected_tv_ip_port()
     
     content = {
         "app_name": name,
@@ -67,6 +68,11 @@ def create(name, shortcut, app_path, ip, port, debug):
     
     print("* Config file created at {}".format(filename))
 
+@click.command()
+def tv():
+    ip, port = get_connected_tv_ip_port()
+    print "{}:{}".format(ip, port)
+    
 @click.group()
 def cli():
     pass
@@ -75,4 +81,5 @@ if(__name__=="__main__"):
     cli.add_command(install)
     cli.add_command(uninstall)
     cli.add_command(create)
+    cli.add_command(tv)
     cli()
