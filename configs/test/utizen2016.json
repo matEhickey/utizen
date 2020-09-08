@@ -1,0 +1,7 @@
+{
+    "app_name": "UtizenTest", 
+    "app_path": "/home/mdidier/Prog/utizentest", 
+    "debug": "WITH_TIMEOUT", 
+    "ip": "10.1.110.126", 
+    "port": "26101"
+}

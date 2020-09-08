@@ -1,0 +1,17 @@
+{
+    "name": "tizen-upload-py",
+    "description": "Easy tizen app uploader",
+    "version": "1.0.0",
+    "author": "Mathias DIDIER",
+    "dependencies": {
+        "fs-extra": "^8.1.0",
+        "xml2js": "^0.4.23"
+    },
+    "devDependencies": {
+        "eslint": "^5.16.0"
+    },
+    "engines": {
+        "node": ">=10.5.0"
+    },
+    "license": "MIT"
+}

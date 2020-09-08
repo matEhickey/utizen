@@ -1,0 +1,7 @@
+{
+    "app_name": "ShakaWtvRefappTV2019",
+    "app_path": "~/Prog/wtv-vendor-shaka/refapp/generated/default",
+    "ip": "10.1.110.42",
+    "port": "26101",
+    "debug": "WITH_TIMEOUT"
+}

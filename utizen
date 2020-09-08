@@ -1,0 +1,186 @@
+#!/usr/bin/env python2
+
+import re
+import os
+import sys
+import glob
+import json
+import click
+import subprocess
+import xml.etree.ElementTree as ET
+from pprint import pformat
+
+
+class DEBUG:
+    WITH_TIMEOUT="WITH_TIMEOUT"
+    WITHOUT_TIMEOUT="WITHOUT_TIMEOUT"
+    NO_DEBUG="NO_DEBUG"
+    
+def parseXML(filename):
+    return ET.parse(filename).getroot()
+  
+def add_network_privilege(appName, privilege):
+    scriptPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "addPrivilege.js")
+    execute_cmd("node {} {} {}".format(scriptPath, appName, "http://tizen.org/privilege/telephony"))
+
+def get_app_id(package_tmp):
+    filename = "{}/config.xml".format(package_tmp)
+    root = parseXML(filename)
+    app_id = filter(lambda x: x[0] == "id", root.getchildren()[0].items())[0][1]
+    return app_id
+
+def execute_cmd(cmd):
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+    (out, err) = proc.communicate()
+    return out, err
+    
+def store_uploaded_app(app_id, app_name):
+    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "installed", "{}.txt".format(app_name))
+    execute_cmd("echo '{}' >> {}".format(app_id, filename))
+
+def run(app_name, app_path, ip, port, tv_debug):
+    tizen_profile = "tv-samsung-5.5"
+    tizen_template = "BasicEmptyProject"
+    tmp = "/tmp/tizen-upload-py"
+    package_tmp = "{}/{}".format(tmp, app_name)
+
+    current_path = os.path.dirname(os.path.realpath(__file__))
+    configsFiles = glob.glob(os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs/*"))
+
+
+
+    bootstrap_command = "tizen create web-project -n {} -p {} -t {} -- {}".format(app_name, tizen_profile, tizen_template, tmp);
+    print(bootstrap_command)
+    out, err = execute_cmd(bootstrap_command)
+    if not re.match("Project Location: {}\n".format(package_tmp), out):
+        print("Cannot create the project")
+        print(out)
+        sys.exit()
+
+
+
+
+    add_network_privilege(app_name, "http://tizen.org/privilege/telephony")
+
+
+
+
+    package_command = "wtv-package --with-workspace-only {} -p ${} --output ${} -v tizen".format(package_tmp, app_name, app_path)
+    print(package_command)
+    out, err = execute_cmd(package_command)
+
+
+
+
+
+    install_command = "tizen install -s {}:{} -n {}.wgt -- {}".format(ip, port, app_name, app_path)
+    print(install_command)
+    out, err = execute_cmd(install_command)
+
+
+
+    app_id = get_app_id(package_tmp)
+    store_uploaded_app(app_id, app_name)
+
+
+    run_command = "tizen run -p {}".format(app_id)
+    print(run_command)
+    out, err = execute_cmd(run_command)
+
+    error_message = "There is no connected target"
+    if re.match(error_message, out):
+        print(error_message)
+        sys.exit()
+
+
+
+
+    if(tv_debug == DEBUG.NO_DEBUG):
+        sys.exit()
+        
+    debug_command = ""
+    if(tv_debug == DEBUG.WITH_TIMEOUT):
+        debug_command = "~/tizen-studio/tools/sdb -s {}:{} shell 0 debug {} 300".format(ip, port, app_id)
+    else:
+        debug_command = "~/tizen-studio/tools/sdb -s {}:{} shell 0 debug {}".format(ip, port, app_id)
+        
+    print(debug_command)
+    out, err = execute_cmd(debug_command)
+    print("** wip implement parsing to get the debug port")
+    # print("debug port: ${port}".format(debug_port))
+
+@click.command()
+@click.option('--config', prompt='Config file', help='the config path')
+def install(config):
+    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", "{}.json".format(config))
+    with open(filename) as f:
+        content = json.loads(f.read())
+        app_name = str(content["app_name"])
+        app_path = str(content["app_path"])
+        ip = str(content["ip"])
+        port = str(content["port"])
+        
+        tv_debug = DEBUG.NO_DEBUG
+        if(content["debug"] == "WITH_TIMEOUT"):
+            tv_debug = DEBUG.WITH_TIMEOUT
+        elif(content["debug"] == "WITHOUT_TIMEOUT"):
+            tv_debug = DEBUG.WITHOUT_TIMEOUT
+        
+        run(app_name, app_path, ip, port, tv_debug)
+        
+@click.command()
+@click.option('--config', prompt='Config file', help='the config path')
+def uninstall(config):
+    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", "{}.json".format(config))
+    with open(filename) as f:
+        content = json.loads(f.read())
+        app_name = str(content["app_name"])
+        installed_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "installed", "{}.txt".format(app_name))
+        with open(installed_filename) as installed_file:
+            for app_id in installed_file.readlines():
+                app_id = app_id.replace("\n", "")
+                uninstall_command = "tizen uninstall -p {}".format(app_id)
+                print(uninstall_command)
+                out, err = execute_cmd(uninstall_command)
+                print(out)
+                
+@click.command()
+@click.option('--name', prompt='App name (camelCaseWithoutSymbols)', help='The name of the app (camelCaseWithoutSymbols)')
+@click.option('--shortcut', prompt= 'Project Shortcut (ex: refapp/2016)', help='The project shortcut, ex: refapp/2016, will store the config into configs/refapp/2016.json')
+@click.option('--app_path', default= '.', help='The path of the app')
+@click.option('--ip', prompt='TV IP', help='The tv IP, ex: 110.111.112.113')
+@click.option('--port', default="26101", help='The tv port, default: 26101')
+@click.option('--debug', default="WITH_TIMEOUT", help='The tv debug mode, default: WITH_TIMEOUT, options: [WITH_TIMEOUT, WITHOUT_TIMEOUT, NO_DEBUG]')
+def create(name, shortcut, app_path, ip, port, debug):
+    path = os.path.abspath(os.path.join(os.getcwd(), app_path))
+    
+    content = {
+        "app_name": name,
+        "app_path": path,
+        "ip": ip,
+        "port": port,
+        "debug": debug
+    }
+    
+    filecontent = json.dumps(content, sort_keys=True, indent=4)
+    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", "{}.json".format(shortcut))
+    
+    dirname = os.path.abspath(os.path.abspath(os.path.join(filename, os.pardir)))
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    
+    f = open(filename, "w")
+    f.write(filecontent)
+    f.close()
+    
+    print("* Config file created at {}".format(filename))
+
+@click.group()
+def cli():
+    pass
+    
+if(__name__=="__main__"):
+    cli.add_command(install)
+    cli.add_command(uninstall)
+    cli.add_command(create)
+    cli()
