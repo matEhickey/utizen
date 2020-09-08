@@ -31,9 +31,12 @@ def run(app_name, app_path, ip, port, tv_debug):
     out, err = execute_cmd(package_command)
 
 
-    install_command = "tizen install -s {}:{} -n {}.wgt -- {}".format(ip, port, app_name, app_path)
+    install_command = "tizen install -s {}:{} -n {}.wgt -- {}".format(ip, port, app_name, package_tmp)
     print(install_command)
     out, err = execute_cmd(install_command)
+    print(out)
+    if "Fail" in out:
+        sys.exit()
 
 
     app_id = get_app_id(package_tmp)

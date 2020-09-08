@@ -1,7 +1,7 @@
 {
     "app_name": "ShakaStandaloneTV2018",
-    "app_path": "~/Prog/shaka-player/refapp",
+    "app_path": "~/Prog/shaka-player/refapp/generated/sfr-classique",
     "ip": "10.1.110.32",
     "port": "26101",
-    "debug": "WITH_TIMEOUT"
+    "debug": "WITHOUT_TIMEOUT"
 }
