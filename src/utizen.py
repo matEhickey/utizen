@@ -1,0 +1,68 @@
+import re
+import os
+import sys
+import glob
+from utils import add_network_privilege, execute_cmd, store_uploaded_app, get_app_id
+
+def run(app_name, app_path, ip, port, tv_debug):
+    tizen_profile = "tv-samsung-5.5"
+    tizen_template = "BasicEmptyProject"
+    tmp = "/tmp/tizen-upload-py"
+    package_tmp = "{}/{}".format(tmp, app_name)
+
+    current_path = os.path.dirname(os.path.realpath(__file__))
+    configsFiles = glob.glob(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../configs/*"))
+
+
+    bootstrap_command = "tizen create web-project -n {} -p {} -t {} -- {}".format(app_name, tizen_profile, tizen_template, tmp);
+    print(bootstrap_command)
+    out, err = execute_cmd(bootstrap_command)
+    if not re.match("Project Location: {}\n".format(package_tmp), out):
+        print("Cannot create the project")
+        print(out)
+        sys.exit()
+
+
+    add_network_privilege(app_name, "http://tizen.org/privilege/telephony")
+
+
+    package_command = "wtv-package --with-workspace-only {} -p ${} --output ${} -v tizen".format(package_tmp, app_name, app_path)
+    print(package_command)
+    out, err = execute_cmd(package_command)
+
+
+    install_command = "tizen install -s {}:{} -n {}.wgt -- {}".format(ip, port, app_name, app_path)
+    print(install_command)
+    out, err = execute_cmd(install_command)
+
+
+    app_id = get_app_id(package_tmp)
+    store_uploaded_app(app_id, app_name)
+
+
+    run_command = "tizen run -p {}".format(app_id)
+    print(run_command)
+    out, err = execute_cmd(run_command)
+
+    error_message = "There is no connected target"
+    if re.match(error_message, out):
+        print(error_message)
+        sys.exit()
+
+
+        debug_command = ""
+    if(tv_debug == "NO_DEBUG"):
+        print("No debugging needed, exiting now")
+        sys.exit()
+    elif(tv_debug == "WITH_TIMEOUT"):
+        debug_command = "~/tizen-studio/tools/sdb -s {}:{} shell 0 debug {} 300".format(ip, port, app_id)
+    elif(tv_debug == "WITH_TIMEOUT"):
+        debug_command = "~/tizen-studio/tools/sdb -s {}:{} shell 0 debug {}".format(ip, port, app_id)
+    else:
+        print("no '{}' debug mode".format(tv_debug))
+        sys.exit()
+        
+    print(debug_command)
+    out, err = execute_cmd(debug_command)
+    print("** wip implement parsing to get the debug port")
+    # print("debug port: ${port}".format(debug_port))
