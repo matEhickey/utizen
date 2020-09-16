@@ -1,0 +1,7 @@
+{
+    "app_name": "sfrpremium", 
+    "app_path": "/home/mdidier/Prog/wtv-vendor-shaka/refApp/generated/sfr-premium", 
+    "debug": "WITHOUT_TIMEOUT", 
+    "ip": "10.1.110.32", 
+    "port": "26101"
+}

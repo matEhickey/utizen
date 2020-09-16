@@ -1,0 +1,7 @@
+{
+    "app_name": "captions", 
+    "app_path": "/home/mdidier/Prog/wtv-vendor-shaka2/refApp/generated/captions", 
+    "debug": "WITHOUT_TIMEOUT", 
+    "ip": "10.1.110.32", 
+    "port": "26101"
+}

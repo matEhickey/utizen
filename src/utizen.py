@@ -2,6 +2,8 @@ import re
 import os
 import sys
 import glob
+import shutil
+from distutils.dir_util import copy_tree
 from utils import add_network_privilege, execute_cmd, store_uploaded_app, get_app_id
 
 def run(app_name, app_path, ip, port, tv_debug):
@@ -12,8 +14,9 @@ def run(app_name, app_path, ip, port, tv_debug):
 
     current_path = os.path.dirname(os.path.realpath(__file__))
     configsFiles = glob.glob(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../configs/*"))
-
-
+    
+    shutil.rmtree(package_tmp, ignore_errors=True);
+    
     bootstrap_command = "tizen create web-project -n {} -p {} -t {} -- {}".format(app_name, tizen_profile, tizen_template, tmp);
     print(bootstrap_command)
     out, err = execute_cmd(bootstrap_command)
@@ -21,12 +24,20 @@ def run(app_name, app_path, ip, port, tv_debug):
         print("Cannot create the project")
         print(out)
         sys.exit()
-
+    
+    # copy project file
+    copy_tree(app_path, package_tmp)
+    
+    # move .html to index.html
+    other_index = filter(lambda x: os.path.basename(x) != "index.html", glob.glob(package_tmp + "/*.html"))
+    if(len(other_index) > 0):
+        other_index = other_index[0]
+        shutil.move(other_index, os.path.join(package_tmp, "index.html"))
 
     add_network_privilege(app_name, "http://tizen.org/privilege/telephony")
 
 
-    package_command = "wtv-package --with-workspace-only {} -p ${} --output ${} -v tizen".format(package_tmp, app_name, app_path)
+    package_command = "wtv-package --with-workspace-only {} --profile {} --output {} -v tizen".format(package_tmp, app_name, package_tmp)
     print(package_command)
     out, err = execute_cmd(package_command)
 
@@ -59,7 +70,7 @@ def run(app_name, app_path, ip, port, tv_debug):
         sys.exit()
     elif(tv_debug == "WITH_TIMEOUT"):
         debug_command = "~/tizen-studio/tools/sdb -s {}:{} shell 0 debug {} 300".format(ip, port, app_id)
-    elif(tv_debug == "WITH_TIMEOUT"):
+    elif(tv_debug == "WITHOUT_TIMEOUT"):
         debug_command = "~/tizen-studio/tools/sdb -s {}:{} shell 0 debug {}".format(ip, port, app_id)
     else:
         print("no '{}' debug mode".format(tv_debug))
@@ -67,5 +78,6 @@ def run(app_name, app_path, ip, port, tv_debug):
         
     print(debug_command)
     out, err = execute_cmd(debug_command)
+    print("'{}'".format(out))
     print("** wip implement parsing to get the debug port")
     # print("debug port: ${port}".format(debug_port))
