@@ -1,7 +1,0 @@
-{
-    "app_name": "ShakaWtvRefappTV2019",
-    "app_path": "/home/mdidier/Prog/wtv-vendor-shaka/refApp/generated/sfr-classique",
-    "ip": "10.1.110.42",
-    "port": "26101",
-    "debug": "WITH_TIMEOUT"
-}

@@ -1,7 +1,0 @@
-{
-    "app_name": "sfr", 
-    "app_path": "/home/mdidier/Prog/wtv-vendor-shaka/refApp/generated/sfr", 
-    "debug": "WITHOUT_TIMEOUT", 
-    "ip": "10.1.110.46", 
-    "port": "26101"
-}

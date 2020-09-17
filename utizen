@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
 import os
+import sys
 import json
 import click
 from src.utizen import run, execute_cmd
@@ -10,25 +11,25 @@ from pprint import pformat
 @click.command()
 @click.option('--config', prompt='Config file', help='the config path')
 def install(config):
-    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", "{}.json".format(config))
+    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", "projects", "{}.json".format(config))    
     with open(filename) as f:
         content = json.loads(f.read())
         app_name = str(content["app_name"])
         app_path = str(content["app_path"])
-        ip = str(content["ip"])
-        port = str(content["port"])
-        tv_debug = str(content["debug"])
-        
-        run(app_name, app_path, ip, port, tv_debug)
+        ip, port = get_connected_tv_ip_port()
+                
+        run(app_name, app_path, ip, port)
         
 @click.command()
 @click.option('--config', prompt='Config file', help='the config path')
 def uninstall(config):
-    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", "{}.json".format(config))
+    ip, port = get_connected_tv_ip_port()
+    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", "projects", "{}.json".format(config))
+    
     with open(filename) as f:
         content = json.loads(f.read())
         app_name = str(content["app_name"])
-        installed_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "installed", "{}.txt".format(app_name))
+        installed_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "installed", ip, "{}.txt".format(app_name))
         with open(installed_filename) as installed_file:
             for app_id in installed_file.readlines():
                 app_id = app_id.replace("\n", "")
@@ -36,27 +37,21 @@ def uninstall(config):
                 print(uninstall_command)
                 out, err = execute_cmd(uninstall_command)
                 print(out)
+        os.remove(installed_filename)
                 
 @click.command()
 @click.option('--name', prompt='App name (camelCaseWithoutSymbols)', help='The name of the app (camelCaseWithoutSymbols)')
-@click.option('--shortcut', prompt= 'Project Shortcut (ex: refapp/2016)', help='The project shortcut, ex: refapp/2016, will store the config into configs/refapp/2016.json')
 @click.option('--app_path', default= '.', help='The path of the app')
-@click.option('--debug', default="WITH_TIMEOUT", help='The tv debug mode, default: WITH_TIMEOUT, options: [WITH_TIMEOUT, WITHOUT_TIMEOUT, NO_DEBUG]')
-def create(name, shortcut, app_path, debug):
+def create(name, app_path):
     path = os.path.abspath(os.path.join(os.getcwd(), app_path))
-    
-    ip, port = get_connected_tv_ip_port()
     
     content = {
         "app_name": name,
-        "app_path": path,
-        "ip": ip,
-        "port": port,
-        "debug": debug
+        "app_path": path
     }
     
     filecontent = json.dumps(content, sort_keys=True, indent=4)
-    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", "{}.json".format(shortcut))
+    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", "projects", "{}.json".format(name))
     
     dirname = os.path.abspath(os.path.abspath(os.path.join(filename, os.pardir)))
     if not os.path.exists(dirname):

@@ -1,7 +1,0 @@
-{
-    "app_name": "sfrclassique", 
-    "app_path": "/home/mdidier/Prog/wtv-vendor-shaka/refApp/generated/sfr-classique", 
-    "debug": "WITHOUT_TIMEOUT", 
-    "ip": "10.1.110.32", 
-    "port": "26101"
-}

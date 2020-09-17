@@ -21,8 +21,8 @@ def add_network_privilege(appName, privilege):
     scriptPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "addPrivilege.js")
     execute_cmd("node {} {} {}".format(scriptPath, appName, "http://tizen.org/privilege/telephony"))
 
-def store_uploaded_app(app_id, app_name):
-    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "installed", "{}.txt".format(app_name))
+def store_uploaded_app(app_id, app_name, ip):
+    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, "installed", ip, "{}.txt".format(app_name))
     dirname = os.path.abspath(os.path.abspath(os.path.join(filename, os.pardir)))
     if not os.path.exists(dirname):
         os.makedirs(dirname)

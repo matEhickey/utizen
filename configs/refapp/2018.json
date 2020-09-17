@@ -1,7 +1,0 @@
-{
-    "app_name": "ShakaWtvRefappTV2018",
-    "app_path": "/home/mdidier/Prog/wtv-vendor-shaka/refApp/generated/captions",
-    "ip": "10.1.110.32",
-    "port": "26101",
-    "debug": "WITHOUT_TIMEOUT"
-}

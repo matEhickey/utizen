@@ -2,11 +2,30 @@ import re
 import os
 import sys
 import glob
+import json
 import shutil
 from distutils.dir_util import copy_tree
 from utils import add_network_privilege, execute_cmd, store_uploaded_app, get_app_id
 
-def run(app_name, app_path, ip, port, tv_debug):
+debug_mode = {
+    "2016": "NO_DEBUG",
+    "2017": "WITH_TIMEOUT",
+    "2018": "WITHOUT_TIMEOUT",
+    "2019": "WITH_TIMEOUT",
+    "2020": "WITH_TIMEOUT"
+}
+
+def getTvDebugMode(ip): 
+    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, "configs", "TVs.json")
+    with open(filename) as f:
+        content = json.loads(f.read())
+        return debug_mode[content[ip]]
+    
+    raise "No tv debug mode for {}".format(ip)
+
+def run(app_name, app_path, ip, port):
+    tv_debug = getTvDebugMode(ip)
+    
     tizen_profile = "tv-samsung-5.5"
     tizen_template = "BasicEmptyProject"
     tmp = "/tmp/tizen-upload-py"
@@ -51,8 +70,7 @@ def run(app_name, app_path, ip, port, tv_debug):
 
 
     app_id = get_app_id(package_tmp)
-    store_uploaded_app(app_id, app_name)
-
+    store_uploaded_app(app_id, app_name, ip)
 
     run_command = "tizen run -p {}".format(app_id)
     print(run_command)
