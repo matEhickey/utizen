@@ -46,7 +46,37 @@ $ echo 'export PATH="$HOME/tizen-studio/tools:$PATH"' >> ~/.zshrc
 ~~~sh
 echo 'export PATH=$PATH:/home/user/utizen' >> ~/.bash_profile
 ~~~
-5. install app
-6. `utizen install --config refapp/2016 # the config is located at configs/refapp/2016.json`
-7. Uninstall all app versions on the device
-8. `utizen uninstall --config refapp/2016`
+
+
+## How to use
+
+### Configuring tv:  
+put all your tv ip and their model (year) in configs/TVs.json  
+ex:  
+~~~json
+{
+  "10.1.110.126": "2016",
+  "10.1.110.28": "2017",
+  "10.1.110.32": "2018",
+  "10.1.110.42": "2019",
+  "10.1.110.46": "2020"
+}
+~~~
+
+### Configuring application
+Navigate to your deployement folder, and type:  
+~~~
+utizen create
+~~~
+And add the app name when asked, or use the cli arguments to define name or path (utizen --help)
+
+### Install app
+~~~sh
+utizen install --config appname
+~~~
+
+
+### Uninstall all app versions on the device
+~~~sh
+utizen uninstall --config appname
+~~~
