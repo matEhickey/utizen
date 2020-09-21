@@ -6,7 +6,7 @@ const xml2js = require('xml2js')
 var parseString = xml2js.parseStringPromise
 
 const AddNetworkPrivilege = async function (appName, privilege) {
-    const filename = `/tmp/tizen-upload-py/${appName}/config.xml`
+    const filename = `/tmp/utizen/${appName}/config.xml`
     console.warn(appName)
     console.warn(filename)
     

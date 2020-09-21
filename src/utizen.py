@@ -12,7 +12,7 @@ debug_mode = {
     "2017": "WITH_TIMEOUT",
     "2018": "WITHOUT_TIMEOUT",
     "2019": "WITH_TIMEOUT",
-    "2020": "WITH_TIMEOUT"
+    "2020": "WITHOUT_TIMEOUT"
 }
 
 def getTvDebugMode(ip): 
@@ -28,7 +28,7 @@ def run(app_name, app_path, ip, port):
     
     tizen_profile = "tv-samsung-5.5"
     tizen_template = "BasicEmptyProject"
-    tmp = "/tmp/tizen-upload-py"
+    tmp = "/tmp/utizen"
     package_tmp = "{}/{}".format(tmp, app_name)
 
     current_path = os.path.dirname(os.path.realpath(__file__))
