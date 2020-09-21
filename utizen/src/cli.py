@@ -13,7 +13,7 @@ def get_config_names(ctx, args, incomplete):
     return filter(lambda x: x.startswith(incomplete), map(lambda x: x.split("/")[-1].split(".")[0], glob.glob("utizen/configs/projects/*.json")))
 
 @click.command()
-@click.option('--config', type=click.STRING, autocompletion=get_config_names, prompt='Config file', help='the config path')
+@click.argument('config', type=click.STRING, autocompletion=get_config_names, metavar='<config name>')
 def install(config):
     filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.pardir, "configs", "projects", "{}.json".format(config))    
     with open(filename) as f:
@@ -25,7 +25,7 @@ def install(config):
         run(app_name, app_path, ip, port)
         
 @click.command()
-@click.option('--config', prompt='Config file', help='the config path')
+@click.argument('config', type=click.STRING, autocompletion=get_config_names, metavar='<config name>')
 def uninstall(config):
     ip, port = get_connected_tv_ip_port()
     filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.pardir, "configs", "projects", "{}.json".format(config))
