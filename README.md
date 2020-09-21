@@ -42,9 +42,14 @@ $ echo 'export PATH="$HOME/tizen-studio/tools:$PATH"' >> ~/.zshrc
 1. Clone this repository using git
 2. `cd utizen`
 3. `npm i`
-5. add utizen to your path
+5. install utizen in dev mode (for now)
 ~~~sh
-echo 'export PATH=$PATH:/home/user/utizen' >> ~/.bash_profile
+pip install -e .
+~~~
+
+6. add autocomplete to your bashrc
+~~~sh
+echo 'eval "$(_UTIZEN_COMPLETE=source_bash utizen)"' >> ~/.bashrc
 ~~~
 
 

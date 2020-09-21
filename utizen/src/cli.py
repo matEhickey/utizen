@@ -4,14 +4,18 @@ import os
 import sys
 import json
 import click
-from src.utizen import run, execute_cmd
-from src.utils import get_connected_tv_ip_port
+import glob
+from utizen import run, execute_cmd
+from utils import get_connected_tv_ip_port
 from pprint import pformat
 
+def get_config_names(ctx, args, incomplete):
+    return filter(lambda x: x.startswith(incomplete), map(lambda x: x.split("/")[-1].split(".")[0], glob.glob("utizen/configs/projects/*.json")))
+
 @click.command()
-@click.option('--config', prompt='Config file', help='the config path')
+@click.option('--config', type=click.STRING, autocompletion=get_config_names, prompt='Config file', help='the config path')
 def install(config):
-    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", "projects", "{}.json".format(config))    
+    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.pardir, "configs", "projects", "{}.json".format(config))    
     with open(filename) as f:
         content = json.loads(f.read())
         app_name = str(content["app_name"])
@@ -24,7 +28,7 @@ def install(config):
 @click.option('--config', prompt='Config file', help='the config path')
 def uninstall(config):
     ip, port = get_connected_tv_ip_port()
-    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", "projects", "{}.json".format(config))
+    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.pardir, "configs", "projects", "{}.json".format(config))
     
     with open(filename) as f:
         content = json.loads(f.read())
@@ -51,7 +55,7 @@ def create(name, app_path):
     }
     
     filecontent = json.dumps(content, sort_keys=True, indent=4)
-    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "configs", "projects", "{}.json".format(name))
+    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.pardir, "configs", "projects", "{}.json".format(name))
     
     dirname = os.path.abspath(os.path.abspath(os.path.join(filename, os.pardir)))
     if not os.path.exists(dirname):
@@ -70,10 +74,18 @@ def tv():
         print "{}:{}".format(ip, port)
     except:
         print("* It seem there is no connected devices")
+
+# def get_commands(ctx, args, incomplete):
+#     return filter(lambda x: x.startswith(incomplete), ["install", "uninstall", "create", "tv"])
     
+# @click.argument("", type=click.STRING, autocompletion=get_commands)
 @click.group()
 def cli():
     pass
+
+# autocomplete need this to be defined
+for command in  [install, uninstall, create, tv]:
+    cli.add_command(command)
     
 if(__name__=="__main__"):
     cli.add_command(install)
