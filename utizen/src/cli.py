@@ -35,7 +35,7 @@ def uninstall(config):
     with open(filename) as f:
         content = json.loads(f.read())
         app_name = str(content["app_name"])
-        installed_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "installed", ip, "{}.txt".format(app_name))
+        installed_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.pardir, "installed", ip, "{}.txt".format(app_name))
         with open(installed_filename) as installed_file:
             for app_id in installed_file.readlines():
                 app_id = app_id.replace("\n", "")
