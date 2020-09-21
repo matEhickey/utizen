@@ -77,21 +77,14 @@ def tv():
     except:
         print("* It seem there is no connected devices")
 
-# def get_commands(ctx, args, incomplete):
-#     return filter(lambda x: x.startswith(incomplete), ["install", "uninstall", "create", "tv"])
-    
-# @click.argument("", type=click.STRING, autocompletion=get_commands)
+
 @click.group()
 def cli():
     pass
 
-# autocomplete need this to be defined
+# autocomplete need this to be defined (when use globaly, __name__ != __main__)
 for command in  [install, uninstall, create, tv]:
     cli.add_command(command)
     
 if(__name__=="__main__"):
-    cli.add_command(install)
-    cli.add_command(uninstall)
-    cli.add_command(create)
-    cli.add_command(tv)
     cli()
