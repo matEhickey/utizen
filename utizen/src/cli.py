@@ -10,7 +10,9 @@ from utils import get_connected_tv_ip_port
 from pprint import pformat
 
 def get_config_names(ctx, args, incomplete):
-    return filter(lambda x: x.startswith(incomplete), map(lambda x: x.split("/")[-1].split(".")[0], glob.glob("utizen/configs/projects/*.json")))
+    glob_configs = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.pardir, "configs", "projects", "*.json")
+    
+    return filter(lambda x: x.startswith(incomplete), map(lambda x: x.split("/")[-1].split(".")[0], glob.glob(glob_configs)))
 
 @click.command()
 @click.argument('config', type=click.STRING, autocompletion=get_config_names, metavar='<config name>')
