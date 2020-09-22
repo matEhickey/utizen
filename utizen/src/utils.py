@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import subprocess
 import xml.etree.ElementTree as ET
 
@@ -17,9 +18,9 @@ def execute_cmd(cmd):
     (out, err) = proc.communicate()
     return out, err
 
-def add_network_privilege(appName, privilege):
+def add_privilege(appName, privilege):
     scriptPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "addPrivilege.js")
-    execute_cmd("node {} {} {}".format(scriptPath, appName, "http://tizen.org/privilege/telephony"))
+    execute_cmd("node {} {} {}".format(scriptPath, appName, privilege))
 
 def store_uploaded_app(app_id, app_name, ip):
     filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, "installed", ip, "{}.txt".format(app_name))
@@ -34,3 +35,6 @@ def get_connected_tv_ip_port():
     match = re.match("List of devices attached \n(\S+\.\S+\.\S+\.\S+:\S+)", out)
     if match:
         return match.groups()[0].split(":")
+    else:
+        print("No TV connected")
+        sys.exit(-1)

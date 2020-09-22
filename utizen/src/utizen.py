@@ -5,7 +5,7 @@ import glob
 import json
 import shutil
 from distutils.dir_util import copy_tree
-from utils import add_network_privilege, execute_cmd, store_uploaded_app, get_app_id
+from utils import add_privilege, execute_cmd, store_uploaded_app, get_app_id
 
 debug_mode = {
     "2016": "NO_DEBUG",
@@ -22,6 +22,17 @@ def getTvDebugMode(ip):
         return debug_mode[content[ip]]
     
     raise "No tv debug mode for {}".format(ip)
+
+
+def add_all_privilege(app_name):
+    privilege_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.pardir, "configs", "privileges.txt")
+    f = open(privilege_file)
+    content = f.readlines()
+    f.close()
+    
+    content = map(lambda x: x.replace("\n", ""), content)
+    for i in content:
+        add_privilege(app_name, i)
 
 def run(app_name, app_path, ip, port):
     tv_debug = getTvDebugMode(ip)
@@ -52,8 +63,16 @@ def run(app_name, app_path, ip, port):
     if(len(other_index) > 0):
         other_index = other_index[0]
         shutil.move(other_index, os.path.join(package_tmp, "index.html"))
-
-    add_network_privilege(app_name, "http://tizen.org/privilege/telephony")
+        
+    add_all_privilege(app_name)
+    # add_privilege(app_name, "http://tizen.org/privilege/telephony")
+    # add_privilege(app_name, "http://developer.samsung.com/privilege/drmplay")
+    # add_privilege(app_name, "http://developer.samsung.com/privilege/contentsdownload")
+    # add_privilege(app_name, "http://developer.samsung.com/privilege/drminfo")
+    # add_privilege(app_name, "http://developer.samsung.com/privilege/network.public")
+    # add_privilege(app_name, "http://developer.samsung.com/privilege/productinfo")
+    # add_privilege(app_name, "http://developer.samsung.com/privilege/sso.partner")
+    # add_privilege(app_name, "http://developer.samsung.com/privilege/widgetdata")
 
 
     package_command = "wtv-package --with-workspace-only {} --profile {} --output {} -v tizen".format(package_tmp, app_name, package_tmp)

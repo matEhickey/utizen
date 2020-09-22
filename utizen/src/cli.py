@@ -71,11 +71,8 @@ def create(name, app_path):
 
 @click.command()
 def tv():
-    try:
-        ip, port = get_connected_tv_ip_port()
-        print "{}:{}".format(ip, port)
-    except:
-        print("* It seem there is no connected devices")
+    ip, port = get_connected_tv_ip_port()
+    print "{}:{}".format(ip, port)
 
 
 @click.group()

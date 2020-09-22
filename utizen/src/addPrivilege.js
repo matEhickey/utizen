@@ -5,11 +5,8 @@ const fs = require('fs-extra')
 const xml2js = require('xml2js')
 var parseString = xml2js.parseStringPromise
 
-const AddNetworkPrivilege = async function (appName, privilege) {
+const AddPrivilege = async function (appName, privilege) {
     const filename = `/tmp/utizen/${appName}/config.xml`
-    console.warn(appName)
-    console.warn(filename)
-    
     
     var content = fs.readFileSync(filename, 'utf8')
 
@@ -32,4 +29,4 @@ if(process.argv.length < 4) {
 const appName = process.argv[2]
 const privilege = process.argv[3]
 
-AddNetworkPrivilege(appName, privilege)
+AddPrivilege(appName, privilege)
