@@ -1,4 +1,8 @@
 {
     "app_name": "SfrClassique", 
-    "app_path": "/home/mdidier/Prog/wtv-vendor-shaka/refApp/generated/sfr-classique"
+    "app_path": "/home/mdidier/Prog/wtv-vendor-shaka/refApp/generated/sfr-classique",
+    "privileges": [
+      "http://tizen.org/privilege/telephony",
+      "http://tizen.org/privilege/internet"
+    ]
 }

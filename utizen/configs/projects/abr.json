@@ -1,4 +1,8 @@
 {
     "app_name": "abr", 
-    "app_path": "/home/mdidier/Prog/wtv-vendor-shaka/refApp/generated/abr-sfr"
+    "app_path": "/home/mdidier/Prog/wtv-vendor-shaka/refApp/generated/abr-sfr",
+    "privileges": [
+      "http://tizen.org/privilege/telephony",
+      "http://tizen.org/privilege/internet"
+    ]
 }

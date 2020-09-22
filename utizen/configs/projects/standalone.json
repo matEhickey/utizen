@@ -1,4 +1,8 @@
 {
     "app_name": "ShakaStandalone",
-    "app_path": "/home/mdidier/Prog/shaka-player/refapp"
+    "app_path": "/home/mdidier/Prog/shaka-player/refapp",
+    "privileges": [
+      "http://tizen.org/privilege/telephony",
+      "http://tizen.org/privilege/internet"
+    ]
 }

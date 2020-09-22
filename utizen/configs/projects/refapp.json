@@ -1,4 +1,8 @@
 {
-    "app_name": "WtvRefapp",
-    "app_path": "/home/mdidier/Prog/wtv-vendor-shaka/refApp/generated/default"
+    "app_name": "WtvRefapp", 
+    "app_path": "/home/mdidier/Prog/wtv-vendor-shaka/refApp/generated/default", 
+    "privileges": [
+      "http://tizen.org/privilege/telephony",
+      "http://tizen.org/privilege/internet"
+    ]
 }

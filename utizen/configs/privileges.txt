@@ -66,7 +66,6 @@ http://tizen.org/privilege/tv.window
 http://tizen.org/privilege/volume.set
 http://tizen.org/privilege/websetting
 http://tizen.org/privilege/widget.viewer
-http://tizen.org/privilege/internet
 http://tizen.org/privilege/location
 http://tizen.org/privilege/mediacapture
 http://tizen.org/privilege/notification

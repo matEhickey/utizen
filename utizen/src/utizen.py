@@ -5,7 +5,7 @@ import glob
 import json
 import shutil
 from distutils.dir_util import copy_tree
-from utils import add_privilege, execute_cmd, store_uploaded_app, get_app_id
+from utils import add_privilege, execute_cmd, store_uploaded_app, get_app_id, get_config, save_config_file
 
 debug_mode = {
     "2016": "NO_DEBUG",
@@ -24,30 +24,39 @@ def getTvDebugMode(ip):
     raise "No tv debug mode for {}".format(ip)
 
 
-def add_all_privilege(app_name):
-    privilege_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.pardir, "configs", "privileges.txt")
-    f = open(privilege_file)
-    content = f.readlines()
-    f.close()
+def add_own_privilege(config):
+    app, filename = get_config(config)
     
-    content = map(lambda x: x.replace("\n", ""), content)
-    for i in content:
-        add_privilege(app_name, i)
+    for i in app["privileges"]:
+        print(i)
+        add_privilege(app["app_name"], i)
 
-def run(app_name, app_path, ip, port):
+def add_privilege_to_config(config, privileges):
+    app, filename = get_config(config)
+    
+    content = {
+        "app_name": app["app_name"],
+        "app_path": app["app_path"],
+        "privileges": privileges
+    }
+    
+    save_config_file(config, content)
+
+def run(config, ip, port):
+    app, filename = get_config(config)
     tv_debug = getTvDebugMode(ip)
     
     tizen_profile = "tv-samsung-5.5"
     tizen_template = "BasicEmptyProject"
     tmp = "/tmp/utizen"
-    package_tmp = "{}/{}".format(tmp, app_name)
+    package_tmp = "{}/{}".format(tmp, app["app_name"])
 
     current_path = os.path.dirname(os.path.realpath(__file__))
     configsFiles = glob.glob(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../configs/*"))
     
     shutil.rmtree(package_tmp, ignore_errors=True);
     
-    bootstrap_command = "tizen create web-project -n {} -p {} -t {} -- {}".format(app_name, tizen_profile, tizen_template, tmp);
+    bootstrap_command = "tizen create web-project -n {} -p {} -t {} -- {}".format(app["app_name"], tizen_profile, tizen_template, tmp);
     print(bootstrap_command)
     out, err = execute_cmd(bootstrap_command)
     if not re.match("Project Location: {}\n".format(package_tmp), out):
@@ -56,7 +65,7 @@ def run(app_name, app_path, ip, port):
         sys.exit()
     
     # copy project file
-    copy_tree(app_path, package_tmp)
+    copy_tree(app["app_path"], package_tmp)
     
     # move .html to index.html
     other_index = filter(lambda x: os.path.basename(x) != "index.html", glob.glob(package_tmp + "/*.html"))
@@ -64,23 +73,14 @@ def run(app_name, app_path, ip, port):
         other_index = other_index[0]
         shutil.move(other_index, os.path.join(package_tmp, "index.html"))
         
-    add_all_privilege(app_name)
-    # add_privilege(app_name, "http://tizen.org/privilege/telephony")
-    # add_privilege(app_name, "http://developer.samsung.com/privilege/drmplay")
-    # add_privilege(app_name, "http://developer.samsung.com/privilege/contentsdownload")
-    # add_privilege(app_name, "http://developer.samsung.com/privilege/drminfo")
-    # add_privilege(app_name, "http://developer.samsung.com/privilege/network.public")
-    # add_privilege(app_name, "http://developer.samsung.com/privilege/productinfo")
-    # add_privilege(app_name, "http://developer.samsung.com/privilege/sso.partner")
-    # add_privilege(app_name, "http://developer.samsung.com/privilege/widgetdata")
+    add_own_privilege(config)
 
-
-    package_command = "wtv-package --with-workspace-only {} --profile {} --output {} -v tizen".format(package_tmp, app_name, package_tmp)
+    package_command = "wtv-package --with-workspace-only {} --profile {} --output {} -v tizen".format(package_tmp, app["app_name"], package_tmp)
     print(package_command)
     out, err = execute_cmd(package_command)
 
 
-    install_command = "tizen install -s {}:{} -n {}.wgt -- {}".format(ip, port, app_name, package_tmp)
+    install_command = "tizen install -s {}:{} -n {}.wgt -- {}".format(ip, port, app["app_name"], package_tmp)
     print(install_command)
     out, err = execute_cmd(install_command)
     print(out)
@@ -89,7 +89,7 @@ def run(app_name, app_path, ip, port):
 
 
     app_id = get_app_id(package_tmp)
-    store_uploaded_app(app_id, app_name, ip)
+    store_uploaded_app(app_id, app["app_name"], ip)
 
     run_command = "tizen run -p {}".format(app_id)
     print(run_command)

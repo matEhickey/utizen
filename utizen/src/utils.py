@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import subprocess
+import json
 import xml.etree.ElementTree as ET
 
 def parseXML(filename):
@@ -38,3 +39,39 @@ def get_connected_tv_ip_port():
     else:
         print("No TV connected")
         sys.exit(-1)
+
+def get_config(config_name):
+    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.pardir, "configs", "projects", "{}.json".format(config_name))  
+    
+    config = {}  
+    with open(filename) as f:
+        content = json.loads(f.read())
+        config["app_name"] = str(content["app_name"])
+        config["app_path"] = str(content["app_path"])
+        config["privileges"] = content["privileges"] if "privileges" in content else []
+    
+    return config, filename
+
+def save_config_file(config, content):
+        filecontent = json.dumps(content, sort_keys=True, indent=4)
+        app, filename = get_config(config)
+        
+        dirname = os.path.abspath(os.path.abspath(os.path.join(filename, os.pardir)))
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+        
+        f = open(filename, "w")
+        f.write(filecontent)
+        f.close()
+        
+        print("* Config file created at {}".format(filename))
+        
+        
+def get_all_privileges():
+    privilege_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.pardir, "configs", "privileges.txt")
+    f = open(privilege_file)
+    content = f.readlines()
+    f.close()
+
+    content = map(lambda x: x.replace("\n", ""), content)
+    return content
