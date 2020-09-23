@@ -4,3 +4,4 @@ installed
 __pycache__/
 *.py[cod]
 *.egg-info
+utizen/.env

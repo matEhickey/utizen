@@ -6,6 +6,7 @@ import json
 import shutil
 from distutils.dir_util import copy_tree
 from utils import *
+import settings
 
 TMP = "/tmp/utizen"
 
@@ -106,18 +107,20 @@ def package_app(config):
     
     tizen = "~/tizen-studio/tools/ide/bin/tizen"
     app_name = app["app_name"]
+    workspace = os.path.join(TMP, app_name)
     tizen_profile = "tv-samsung-5.5"
     tizen_template = "BasicEmptyProject"
-    workspace = os.path.join(TMP, app_name)
     security_profile = "tv-samsung"
-    cert_password = "123456789"
     cert_filename = "wiztivi.p12"
     certificate_absolute_path = os.path.join("~/tizen-studio-data/keystore/author", cert_filename)
     cert_alias = "tv-samsung"
-    cert_email = "contact@wiztivi.com"
-    cert_country = "FR"
     package_format = "wgt"
     output = workspace
+    
+    cert_password = settings.get("CERT_PASSWORD")
+    cert_email = settings.get("CERT_EMAIL")
+    cert_country = settings.get("CERT_COUNTRY")
+    
     
     
     tizen_commands = {
