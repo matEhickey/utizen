@@ -6,22 +6,33 @@ import json
 import click
 import glob
 import pick
+from pprint import pformat
 from utizen import run, execute_cmd, add_privilege_to_config
-from utils import get_connected_tv_ip_port, get_all_privileges, get_config, save_config_file
+from utils import *
 
-def get_config_names_autocomplete(ctx, args, incomplete):
-    glob_configs = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.pardir, "configs", "projects", "*.json")
+@click.group()
+def cli():
+    pass
     
-    return filter(lambda x: x.startswith(incomplete), map(lambda x: x.split("/")[-1].split(".")[0], glob.glob(glob_configs)))
-
-@click.command()
-@click.argument('config', type=click.STRING, autocompletion=get_config_names_autocomplete, metavar='<config name>')
+@cli.command()
+@click.argument('config', type=click.STRING, autocompletion=get_configs_names_autocomplete, metavar='<config name>')
 def install(config):
     ip, port = get_connected_tv_ip_port()
     run(config, ip, port)
+    
+@cli.command()
+@click.argument('config', type=click.STRING, autocompletion=get_configs_names_autocomplete, metavar='<config name>')
+def config(config):
+    app, filename = get_config(config)
+    click.echo(pformat(app))
+    
+@cli.command()
+def ls():
+    for i in get_configs_names():
+        click.echo(i)
         
-@click.command()
-@click.argument('config', type=click.STRING, autocompletion=get_config_names_autocomplete, metavar='<config name>')
+@cli.command()
+@click.argument('config', type=click.STRING, autocompletion=get_configs_names_autocomplete, metavar='<config name>')
 def uninstall(config):
     app, filename = get_config(config)
     app_name = app["app_name"]
@@ -32,12 +43,12 @@ def uninstall(config):
         for app_id in installed_file.readlines():
             app_id = app_id.replace("\n", "")
             uninstall_command = "tizen uninstall -p {}".format(app_id)
-            print(uninstall_command)
+            click.echo(uninstall_command)
             out, err = execute_cmd(uninstall_command)
-            print(out)
+            click.echo(out)
     os.remove(installed_filename)
                 
-@click.command()
+@cli.command()
 @click.option('--name', prompt='App name (camelCaseWithoutSymbols)', help='The name of the app (camelCaseWithoutSymbols)')
 @click.option('--app_path', default= '.', help='The path of the app')
 def create(name, app_path):
@@ -54,13 +65,13 @@ def create(name, app_path):
     
     save_config_file(name, content)
 
-@click.command()
+@cli.command()
 def tv():
     ip, port = get_connected_tv_ip_port()
-    print "{}:{}".format(ip, port)
+    click.echo("{}:{}".format(ip, port))
 
-@click.command()
-@click.argument('config', type=click.STRING, autocompletion=get_config_names_autocomplete, metavar='<config name>')
+@cli.command()
+@click.argument('config', type=click.STRING, autocompletion=get_configs_names_autocomplete, metavar='<config name>')
 def set_privileges(config):
     title = 'Choose the privileges to set to the app (press SPACE to mark, ENTER to continue):'
     options = get_all_privileges()
@@ -77,24 +88,19 @@ def set_privileges(config):
         click.secho("Aborted", bg='black', fg='white')
     else:
         add_privilege_to_config(config, privileges)
-        print("{} privileges set to {}".format(len(privileges), config))
+        click.echo("{} privileges set to {}".format(len(privileges), config))
 
-@click.command()
-@click.argument('config', type=click.STRING, autocompletion=get_config_names_autocomplete, metavar='<config name>')
+@cli.command()
+@click.argument('config', type=click.STRING, autocompletion=get_configs_names_autocomplete, metavar='<config name>')
 def show_privileges(config):
     app, filename = get_config(config)
     click.secho("Privileges of '{}' app:", bg="blue")
     for i in app["privileges"]:
         click.secho(i)
-    
-    
-@click.group()
-def cli():
-    pass
 
 # autocomplete need this to be defined (when use globaly, __name__ != __main__)
-for command in  [install, uninstall, create, tv, set_privileges, show_privileges]:
-    cli.add_command(command)
+# for command in  [install, uninstall, create, tv, set_privileges, show_privileges]:
+#     cli.add_command(command)
     
 if(__name__=="__main__"):
     cli()

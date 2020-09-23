@@ -3,7 +3,20 @@ import re
 import sys
 import subprocess
 import json
+import glob
 import xml.etree.ElementTree as ET
+
+def get_configs_files():
+    glob_configs = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.pardir, "configs", "projects", "*.json")
+    return glob.glob(glob_configs)
+    
+def get_configs_names():
+    config_files = get_configs_files()
+    return map(lambda x: x.split("/")[-1].split(".")[0], config_files)
+    
+def get_configs_names_autocomplete(ctx, args, incomplete):
+    config_names = get_configs_names()
+    return filter(lambda x: x.startswith(incomplete), config_names)
 
 def parseXML(filename):
     return ET.parse(filename).getroot()
