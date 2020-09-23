@@ -7,7 +7,7 @@ import click
 import glob
 import pick
 from pprint import pformat
-from utizen import run, execute_cmd, add_privilege_to_config
+from utizen import run, add_privilege_to_config
 from utils import *
 
 @click.group()

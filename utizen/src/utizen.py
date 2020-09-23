@@ -5,7 +5,9 @@ import glob
 import json
 import shutil
 from distutils.dir_util import copy_tree
-from utils import add_privilege, execute_cmd, store_uploaded_app, get_app_id, get_config, save_config_file
+from utils import *
+
+TMP = "/tmp/utizen"
 
 debug_mode = {
     "2016": "NO_DEBUG",
@@ -28,7 +30,6 @@ def add_own_privilege(config):
     app, filename = get_config(config)
     
     for i in app["privileges"]:
-        print(i)
         add_privilege(app["app_name"], i)
 
 def add_privilege_to_config(config, privileges):
@@ -46,38 +47,19 @@ def run(config, ip, port):
     app, filename = get_config(config)
     tv_debug = getTvDebugMode(ip)
     
-    tizen_profile = "tv-samsung-5.5"
-    tizen_template = "BasicEmptyProject"
-    tmp = "/tmp/utizen"
-    package_tmp = "{}/{}".format(tmp, app["app_name"])
-
-    current_path = os.path.dirname(os.path.realpath(__file__))
-    configsFiles = glob.glob(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../configs/*"))
+    package_tmp = os.path.join(TMP, app["app_name"])
     
-    shutil.rmtree(package_tmp, ignore_errors=True);
-    
-    bootstrap_command = "tizen create web-project -n {} -p {} -t {} -- {}".format(app["app_name"], tizen_profile, tizen_template, tmp);
-    print(bootstrap_command)
-    out, err = execute_cmd(bootstrap_command)
-    if not re.match("Project Location: {}\n".format(package_tmp), out):
-        print("Cannot create the project")
-        print(out)
-        sys.exit()
-    
-    # copy project file
-    copy_tree(app["app_path"], package_tmp)
-    
-    # move .html to index.html
-    other_index = filter(lambda x: os.path.basename(x) != "index.html", glob.glob(package_tmp + "/*.html"))
-    if(len(other_index) > 0):
-        other_index = other_index[0]
-        shutil.move(other_index, os.path.join(package_tmp, "index.html"))
+    shutil.rmtree(package_tmp, ignore_errors=True)
         
-    add_own_privilege(config)
+    # bootstrap_command = "tizen create web-project -n {} -p {} -t {} -- {}".format(app["app_name"], tizen_profile, tizen_template, tmp);
+    # print(bootstrap_command)
+    # out, err = execute_cmd(bootstrap_command)
+    # if not re.match("Project Location: {}\n".format(package_tmp), out):
+    #     print("Cannot create the project")
+    #     print(out)
+    #     sys.exit()
 
-    package_command = "wtv-package --with-workspace-only {} --profile {} --output {} -v tizen".format(package_tmp, app["app_name"], package_tmp)
-    print(package_command)
-    out, err = execute_cmd(package_command)
+    package_app(config)
 
 
     install_command = "tizen install -s {}:{} -n {}.wgt -- {}".format(ip, port, app["app_name"], package_tmp)
@@ -118,3 +100,50 @@ def run(config, ip, port):
     print("'{}'".format(out))
     print("** wip implement parsing to get the debug port")
     # print("debug port: ${port}".format(debug_port))
+
+def package_app(config):
+    app, filename = get_config(config)
+    
+    tizen = "~/tizen-studio/tools/ide/bin/tizen"
+    app_name = app["app_name"]
+    tizen_profile = "tv-samsung-5.5"
+    tizen_template = "BasicEmptyProject"
+    workspace = os.path.join(TMP, app_name)
+    security_profile = "tv-samsung"
+    cert_password = "123456789"
+    cert_filename = "wiztivi.p12"
+    certificate_absolute_path = os.path.join("~/tizen-studio-data/keystore/author", cert_filename)
+    cert_alias = "tv-samsung"
+    cert_email = "contact@wiztivi.com"
+    cert_country = "FR"
+    package_format = "wgt"
+    output = workspace
+    
+    
+    tizen_commands = {
+        "create": "{tizen} create web-project -n {app_name} -p {tizen_profile} -t {tizen_template} -- {tmp_path}".format(tizen=tizen, app_name=app_name, tizen_profile=tizen_profile, tizen_template=tizen_template, tmp_path=TMP),
+        "build": "{tizen} build-web -- {workspace}".format(tizen=tizen, workspace=workspace),
+        "generateCertificate": "{tizen} certificate -a {cert_alias} -p {cert_password} -e {cert_email} -c {cert_country} -f {cert_filename}".format(tizen=tizen, cert_alias=cert_alias, cert_email=cert_email, cert_country=cert_country, cert_filename=cert_filename, cert_password=cert_password),
+        "generateSecurityProfile": "{tizen} security-profiles add -n {security_profile} -p {cert_password} -a {certificate_absolute_path}".format(tizen=tizen, security_profile=security_profile, cert_password=cert_password, certificate_absolute_path=certificate_absolute_path),
+        "generatePackage": "{tizen} package -t {package_format} -s {security_profile} -o {output} -- {workspace}".format(tizen=tizen, package_format=package_format, security_profile=security_profile, output=output, workspace=workspace),
+    }
+    
+    # create the project
+    execute_cmd(tizen_commands["create"])
+    
+    # copy project files
+    copy_tree(app["app_path"], workspace)
+    
+    # move .html to index.html
+    other_index = filter(lambda x: os.path.basename(x) != "index.html", glob.glob(workspace + "/*.html"))
+    if(len(other_index) > 0):
+        other_index = other_index[0]
+        shutil.move(other_index, os.path.join(workspace, "index.html"))
+    
+    # add privileges
+    add_own_privilege(config)
+    
+    # executes last steps
+    for step in ["build", "generateCertificate", "generateSecurityProfile", "generatePackage"]:
+        print("{}: \n\t{}\n".format(step, tizen_commands[step]))
+        execute_cmd(tizen_commands[step])

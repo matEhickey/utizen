@@ -28,7 +28,8 @@ def get_app_id(package_tmp):
     return app_id
     
 def execute_cmd(cmd):
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+    # proc = subprocess.Popen(cmd, shell=True)
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
     return out, err
 
