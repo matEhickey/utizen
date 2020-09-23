@@ -41,7 +41,7 @@ def add_privilege_to_config(config, privileges):
         "privileges": privileges
     }
     
-    save_config_file(config, content)
+    save_config_file(app["app_name"], content)
 
 def run(config, ip, port):
     app, filename = get_config(config)

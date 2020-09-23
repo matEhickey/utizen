@@ -66,9 +66,9 @@ def get_config(config_name):
     
     return config, filename
 
-def save_config_file(config, content):
+def save_config_file(name, content):
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.pardir, "configs", "projects", "{}.json".format(name)) 
         filecontent = json.dumps(content, sort_keys=True, indent=4)
-        app, filename = get_config(config)
         
         dirname = os.path.abspath(os.path.abspath(os.path.join(filename, os.pardir)))
         if not os.path.exists(dirname):
