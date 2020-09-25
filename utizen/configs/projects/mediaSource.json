@@ -1,0 +1,10 @@
+{
+    "app_name": "mediaSource",
+    "app_path": "/home/mdidier/Prog/TizenMediaSource/refapp",
+    "tizen": {
+        "privileges": [
+            "http://tizen.org/privilege/telephony",
+            "http://tizen.org/privilege/internet"
+        ]
+    }
+}

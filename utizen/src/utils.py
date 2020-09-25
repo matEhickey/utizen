@@ -33,10 +33,6 @@ def execute_cmd(cmd):
     (out, err) = proc.communicate()
     return out, err
 
-def add_privilege(appName, privilege):
-    scriptPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "addPrivilege.js")
-    execute_cmd("node {} {} {}".format(scriptPath, appName, privilege))
-
 def store_uploaded_app(app_id, app_name, ip):
     filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, "installed", ip, "{}.txt".format(app_name))
     dirname = os.path.abspath(os.path.abspath(os.path.join(filename, os.pardir)))

@@ -1,0 +1,10 @@
+{
+    "app_name": "newRefapp",
+    "app_path": "/home/mdidier/Prog/wtv-refApp/generated/default", 
+    "tizen": {
+        "privileges": [
+            "http://tizen.org/privilege/telephony",
+            "http://tizen.org/privilege/internet"
+        ]
+    }
+}

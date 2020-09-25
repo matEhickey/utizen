@@ -26,11 +26,20 @@ def getTvDebugMode(ip):
 
     raise "No tv debug mode for {}".format(ip)
 
+def add_privilege(appName, privilege):
+    scriptPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "addPrivilege.js")
+    execute_cmd("node {} {} {}".format(scriptPath, appName, privilege))
 
 def add_own_privilege(config):
     app, filename = get_config(config)
     for i in app["tizen"]["privileges"]:
         add_privilege(app["app_name"], i)
+
+def add_navigation(config):
+    app, filename = get_config(config)
+    scriptPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "allowNavigation.js")
+    execute_cmd("node {} {}".format(scriptPath, app["app_name"]))
+
 
 def add_privilege_to_config(config, privileges):
     app, filename = get_config(config)
@@ -137,6 +146,7 @@ def package_app(config):
 
     # add privileges
     add_own_privilege(config)
+    add_navigation(config)
 
     # executes last steps
     for step in ["build", "generateCertificate", "generateSecurityProfile", "generatePackage"]:

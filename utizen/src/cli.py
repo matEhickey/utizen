@@ -79,10 +79,12 @@ def create(name, app_path):
     content = {
         "app_name": name,
         "app_path": path,
-        "privileges": [
-            "http://tizen.org/privilege/telephony",
-            "http://tizen.org/privilege/internet"
-        ]
+        "tizen": {
+            "privileges": [
+                "http://tizen.org/privilege/telephony",
+                "http://tizen.org/privilege/internet"
+            ]
+        }
     }
 
     save_config_file(name, content)
