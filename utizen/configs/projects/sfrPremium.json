@@ -1,8 +1,10 @@
 {
-    "app_name": "SfrPremium", 
+    "app_name": "SfrPremium",
     "app_path": "/home/mdidier/Prog/wtv-vendor-shaka/refApp/generated/sfr-premium",
-    "privileges": [
-      "http://tizen.org/privilege/telephony",
-      "http://tizen.org/privilege/internet"
-    ]
+    "tizen": {
+      "privileges": [
+        "http://tizen.org/privilege/telephony",
+        "http://tizen.org/privilege/internet"
+      ]
+    }
 }

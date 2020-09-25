@@ -9,6 +9,8 @@ import pick
 from pprint import pformat
 from utizen import run, add_privilege_to_config
 from utils import *
+import lg_packager
+
 
 @click.group()
 def cli():
@@ -16,9 +18,14 @@ def cli():
 
 @cli.command()
 @click.argument('config', type=click.STRING, autocompletion=get_configs_names_autocomplete, metavar='<config name>')
-def install(config):
+@click.option('--TIZEN/--LG', default=True)
+def install(config, tizen):
     ip, port = get_connected_tv_ip_port()
-    run(config, ip, port)
+    if tizen:
+        run(config, ip, port)
+    else:
+        print("LG installation wip")
+        lg_packager.run(config)
 
 @cli.command()
 @click.argument('config', type=click.STRING, autocompletion=get_configs_names_autocomplete, metavar='<config name>')
@@ -110,7 +117,7 @@ def set_privileges(config):
 def show_privileges(config):
     app, filename = get_config(config)
     click.secho("Privileges of '{}' app:", bg="blue")
-    for i in app["privileges"]:
+    for i in app["tizen"]["privileges"]:
         click.secho(i)
 
 if(__name__=="__main__"):

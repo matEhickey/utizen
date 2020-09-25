@@ -1,8 +1,10 @@
 {
-    "app_name": "captions", 
+    "app_name": "captions",
     "app_path": "/home/mdidier/Prog/wtv-vendor-shaka2/refApp/generated/captions",
-    "privileges": [
-      "http://tizen.org/privilege/telephony",
-      "http://tizen.org/privilege/internet"
-    ]
+    "tizen": {
+      "privileges": [
+        "http://tizen.org/privilege/telephony",
+        "http://tizen.org/privilege/internet"
+      ]
+    }
 }

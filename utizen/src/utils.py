@@ -62,8 +62,10 @@ def get_config(config_name):
         content = json.loads(f.read())
         config["app_name"] = str(content["app_name"])
         config["app_path"] = str(content["app_path"])
-        config["privileges"] = content["privileges"] if "privileges" in content else []
-
+        config["tizen"] = {}
+        if "tizen" in content:
+            if "privileges" in content["tizen"]:
+                config["tizen"]["privileges"] = content["tizen"]["privileges"]
     return config, filename
 
 def save_config_file(name, content):

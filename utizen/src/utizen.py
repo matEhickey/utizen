@@ -29,8 +29,7 @@ def getTvDebugMode(ip):
 
 def add_own_privilege(config):
     app, filename = get_config(config)
-
-    for i in app["privileges"]:
+    for i in app["tizen"]["privileges"]:
         add_privilege(app["app_name"], i)
 
 def add_privilege_to_config(config, privileges):
@@ -39,10 +38,12 @@ def add_privilege_to_config(config, privileges):
     content = {
         "app_name": app["app_name"],
         "app_path": app["app_path"],
-        "privileges": privileges
+        "tizen": {
+            "privileges": privileges
+        }
     }
 
-    save_config_file(app["app_name"], content)
+    save_config_file(config, content)
 
 def run(config, ip, port):
     app, filename = get_config(config)

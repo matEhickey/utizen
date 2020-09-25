@@ -1,8 +1,10 @@
 {
-    "app_name": "shaka247", 
+    "app_name": "shaka247",
     "app_path": "/home/mdidier/Prog/shaka-player-2.4.7.copy",
-    "privileges": [
-      "http://tizen.org/privilege/telephony",
-      "http://tizen.org/privilege/internet"
-    ]
+    "tizen": {
+      "privileges": [
+        "http://tizen.org/privilege/telephony",
+        "http://tizen.org/privilege/internet"
+      ]
+    }
 }

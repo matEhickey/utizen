@@ -1,8 +1,18 @@
 {
     "app_name": "WtvRefapp", 
     "app_path": "/home/mdidier/Prog/wtv-vendor-shaka/refApp/generated/default", 
-    "privileges": [
-      "http://tizen.org/privilege/telephony",
-      "http://tizen.org/privilege/internet"
-    ]
+    "tizen": {
+        "privileges": [
+            "http://tizen.org/privilege/account.read", 
+            "http://tizen.org/privilege/account.write", 
+            "http://tizen.org/privilege/alarm", 
+            "http://tizen.org/privilege/apphistory.read", 
+            "http://tizen.org/privilege/application.launch", 
+            "http://tizen.org/privilege/appmanager.certificate", 
+            "http://tizen.org/privilege/appmanager.kill", 
+            "http://tizen.org/privilege/bluetooth", 
+            "http://tizen.org/privilege/bluetooth.admin", 
+            "http://tizen.org/privilege/bluetooth.gap"
+        ]
+    }
 }
