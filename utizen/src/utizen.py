@@ -18,47 +18,39 @@ debug_mode = {
     "2020": "WITHOUT_TIMEOUT"
 }
 
-def getTvDebugMode(ip): 
+def getTvDebugMode(ip):
     filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, "configs", "TVs.json")
     with open(filename) as f:
         content = json.loads(f.read())
         return debug_mode[content[ip]]
-    
+
     raise "No tv debug mode for {}".format(ip)
 
 
 def add_own_privilege(config):
     app, filename = get_config(config)
-    
+
     for i in app["privileges"]:
         add_privilege(app["app_name"], i)
 
 def add_privilege_to_config(config, privileges):
     app, filename = get_config(config)
-    
+
     content = {
         "app_name": app["app_name"],
         "app_path": app["app_path"],
         "privileges": privileges
     }
-    
+
     save_config_file(app["app_name"], content)
 
 def run(config, ip, port):
     app, filename = get_config(config)
     tv_debug = getTvDebugMode(ip)
-    
+
     package_tmp = os.path.join(TMP, app["app_name"])
-    
+
     shutil.rmtree(package_tmp, ignore_errors=True)
-        
-    # bootstrap_command = "tizen create web-project -n {} -p {} -t {} -- {}".format(app["app_name"], tizen_profile, tizen_template, tmp);
-    # print(bootstrap_command)
-    # out, err = execute_cmd(bootstrap_command)
-    # if not re.match("Project Location: {}\n".format(package_tmp), out):
-    #     print("Cannot create the project")
-    #     print(out)
-    #     sys.exit()
 
     package_app(config)
 
@@ -95,7 +87,7 @@ def run(config, ip, port):
     else:
         print("no '{}' debug mode".format(tv_debug))
         sys.exit()
-        
+
     print(debug_command)
     out, err = execute_cmd(debug_command)
     print("'{}'".format(out))
@@ -104,7 +96,7 @@ def run(config, ip, port):
 
 def package_app(config):
     app, filename = get_config(config)
-    
+
     tizen = "~/tizen-studio/tools/ide/bin/tizen"
     app_name = app["app_name"]
     workspace = os.path.join(TMP, app_name)
@@ -116,13 +108,12 @@ def package_app(config):
     cert_alias = "tv-samsung"
     package_format = "wgt"
     output = workspace
-    
+
     cert_password = settings.get("CERT_PASSWORD")
     cert_email = settings.get("CERT_EMAIL")
     cert_country = settings.get("CERT_COUNTRY")
-    
-    
-    
+
+
     tizen_commands = {
         "create": "{tizen} create web-project -n {app_name} -p {tizen_profile} -t {tizen_template} -- {tmp_path}".format(tizen=tizen, app_name=app_name, tizen_profile=tizen_profile, tizen_template=tizen_template, tmp_path=TMP),
         "build": "{tizen} build-web -- {workspace}".format(tizen=tizen, workspace=workspace),
@@ -130,22 +121,22 @@ def package_app(config):
         "generateSecurityProfile": "{tizen} security-profiles add -n {security_profile} -p {cert_password} -a {certificate_absolute_path}".format(tizen=tizen, security_profile=security_profile, cert_password=cert_password, certificate_absolute_path=certificate_absolute_path),
         "generatePackage": "{tizen} package -t {package_format} -s {security_profile} -o {output} -- {workspace}".format(tizen=tizen, package_format=package_format, security_profile=security_profile, output=output, workspace=workspace),
     }
-    
+
     # create the project
     execute_cmd(tizen_commands["create"])
-    
+
     # copy project files
     copy_tree(app["app_path"], workspace)
-    
+
     # move .html to index.html
     other_index = filter(lambda x: os.path.basename(x) != "index.html", glob.glob(workspace + "/*.html"))
     if(len(other_index) > 0):
         other_index = other_index[0]
         shutil.move(other_index, os.path.join(workspace, "index.html"))
-    
+
     # add privileges
     add_own_privilege(config)
-    
+
     # executes last steps
     for step in ["build", "generateCertificate", "generateSecurityProfile", "generatePackage"]:
         print("{}: \n\t{}\n".format(step, tizen_commands[step]))

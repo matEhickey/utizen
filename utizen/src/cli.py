@@ -113,9 +113,5 @@ def show_privileges(config):
     for i in app["privileges"]:
         click.secho(i)
 
-# autocomplete need this to be defined (when use globaly, __name__ != __main__)
-# for command in  [install, uninstall, create, tv, set_privileges, show_privileges]:
-#     cli.add_command(command)
-
 if(__name__=="__main__"):
     cli()
