@@ -14,13 +14,18 @@ const AllowNavigation = async function (appName) {
     var newProperty = "*";
     res["widget"]["tizen:allow-navigation"] = newProperty;
 
+    res["widget"]["access"] = { '$': { origin: "*", subdomains: "true" } };
+
+    res["widget"]["tizen:content-security-policy"] = "default-src *; style-src 'self' https://* http://*; object-src 'none'; script-src 'self' http://* https://* 'unsafe-inline' 'unsafe-eval';";
+
+
     var builder = new xml2js.Builder();
     var xml = builder.buildObject(res);
     fs.writeFileSync(filename, xml);
 }
 
 if(process.argv.length < 3) {
-  console.error("usage: node addPrivilege.js <appname>")
+  console.error("usage: node securityConfig.js <appname>")
   process.exit()
 }
 

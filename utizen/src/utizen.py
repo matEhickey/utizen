@@ -35,9 +35,9 @@ def add_own_privilege(config):
     for i in app["tizen"]["privileges"]:
         add_privilege(app["app_name"], i)
 
-def add_navigation(config):
+def set_security_config(config):
     app, filename = get_config(config)
-    scriptPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "allowNavigation.js")
+    scriptPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "securityConfig.js")
     execute_cmd("node {} {}".format(scriptPath, app["app_name"]))
 
 
@@ -62,52 +62,18 @@ def run(config, ip, port):
 
     shutil.rmtree(package_tmp, ignore_errors=True)
 
-    package_app(config)
+    app_id = package_app(config, package_tmp)
+    install_app(ip, port, app, package_tmp, app_id)
 
-
-    install_command = "tizen install -s {}:{} -n {}.wgt -- {}".format(ip, port, app["app_name"], package_tmp)
-    print(install_command)
-    out, err = execute_cmd(install_command)
-    print(out)
-    if "Fail" in out:
-        sys.exit()
-
-
-    app_id = get_app_id(package_tmp)
     store_uploaded_app(app_id, app["app_name"], ip)
 
-    run_command = "tizen run -p {}".format(app_id)
-    print(run_command)
-    out, err = execute_cmd(run_command)
+    get_debug(ip, port, app_id, tv_debug)
 
-    error_message = "There is no connected target"
-    if re.match(error_message, out):
-        print(error_message)
-        sys.exit()
-
-
-        debug_command = ""
-    if(tv_debug == "NO_DEBUG"):
-        print("No debugging needed, exiting now")
-        sys.exit()
-    elif(tv_debug == "WITH_TIMEOUT"):
-        debug_command = "~/tizen-studio/tools/sdb -s {}:{} shell 0 debug {} 300".format(ip, port, app_id)
-    elif(tv_debug == "WITHOUT_TIMEOUT"):
-        debug_command = "~/tizen-studio/tools/sdb -s {}:{} shell 0 debug {}".format(ip, port, app_id)
-    else:
-        print("no '{}' debug mode".format(tv_debug))
-        sys.exit()
-
-    print(debug_command)
-    out, err = execute_cmd(debug_command)
-    print("'{}'".format(out))
-    print("** wip implement parsing to get the debug port")
-    # print("debug port: ${port}".format(debug_port))
-
-def package_app(config):
+def package_app(config, package_tmp):
     app, filename = get_config(config)
 
     tizen = "~/tizen-studio/tools/ide/bin/tizen"
+    # tizen = "docker run -i --rm jansuchy/tizen-cli"
     app_name = app["app_name"]
     workspace = os.path.join(TMP, app_name)
     tizen_profile = "tv-samsung-5.5"
@@ -133,9 +99,11 @@ def package_app(config):
     }
 
     # create the project
+    print(tizen_commands["create"])
     execute_cmd(tizen_commands["create"])
 
     # copy project files
+    print("Moving files to tmp")
     copy_tree(app["app_path"], workspace)
 
     # move .html to index.html
@@ -145,10 +113,50 @@ def package_app(config):
         shutil.move(other_index, os.path.join(workspace, "index.html"))
 
     # add privileges
+    print("Adding privileges and autorisation")
     add_own_privilege(config)
-    add_navigation(config)
+    set_security_config(config)
 
     # executes last steps
     for step in ["build", "generateCertificate", "generateSecurityProfile", "generatePackage"]:
         print("{}: \n\t{}\n".format(step, tizen_commands[step]))
         execute_cmd(tizen_commands[step])
+
+    app_id = get_app_id(package_tmp)
+    return app_id
+
+def install_app(ip, port, app, package_tmp, app_id):
+    install_command = "tizen install -s {}:{} -n {}.wgt -- {}".format(ip, port, app["app_name"], package_tmp)
+    print(install_command)
+    out, err = execute_cmd(install_command)
+    print(out)
+    if "Fail" in out:
+        sys.exit()
+
+    run_command = "tizen run -p {}".format(app_id)
+    print(run_command)
+    out, err = execute_cmd(run_command)
+
+    error_message = "There is no connected target"
+    if re.match(error_message, out):
+        print(error_message)
+        sys.exit()
+
+def get_debug(ip, port, app_id, tv_debug):
+    debug_command = ""
+    if(tv_debug == "NO_DEBUG"):
+        print("No debugging needed, exiting now")
+        sys.exit()
+    elif(tv_debug == "WITH_TIMEOUT"):
+        debug_command = "~/tizen-studio/tools/sdb -s {}:{} shell 0 debug {} 300".format(ip, port, app_id)
+    elif(tv_debug == "WITHOUT_TIMEOUT"):
+        debug_command = "~/tizen-studio/tools/sdb -s {}:{} shell 0 debug {}".format(ip, port, app_id)
+    else:
+        print("no '{}' debug mode".format(tv_debug))
+        sys.exit()
+
+    print(debug_command)
+    out, err = execute_cmd(debug_command)
+    print("'{}'".format(out))
+    print("** wip implement parsing to get the debug port")
+    # print("debug port: ${port}".format(debug_port))

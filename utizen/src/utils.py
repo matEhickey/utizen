@@ -31,6 +31,11 @@ def execute_cmd(cmd):
     # proc = subprocess.Popen(cmd, shell=True)
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
+    if(err):
+        print("\nERROR: ")
+        print(err)
+        print(out)
+        sys.exit()
     return out, err
 
 def store_uploaded_app(app_id, app_name, ip):
