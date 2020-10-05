@@ -1,6 +1,6 @@
 import os
 import time
-from utils import get_config
+from .utils import get_config
 
 def get_connected_device():
     return "LG"
@@ -29,6 +29,6 @@ def run(config):
     }
 
     for step in ["package", "install", "launch"]:
-        print step
-        print "\t\t", COMMANDS[step]
+        print(step)
+        print("\t\t", COMMANDS[step])
         time.sleep(0.5)

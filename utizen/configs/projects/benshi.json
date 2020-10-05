@@ -1,0 +1,10 @@
+{
+    "app_name": "Benshi", 
+    "app_path": "/home/mdidier/Prog/kiss-benshitv/dist/chrome-benshiTv",
+    "tizen": {
+        "privileges": [
+            "http://tizen.org/privilege/telephony",
+            "http://tizen.org/privilege/internet"
+        ]
+    }
+}

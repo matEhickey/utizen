@@ -1,0 +1,10 @@
+{
+    "app_name": "openplayer", 
+    "app_path": "/home/mdidier/Prog/openplayerjs/demo", 
+    "tizen": {
+        "privileges": [
+            "http://tizen.org/privilege/telephony", 
+            "http://tizen.org/privilege/internet"
+        ]
+    }
+}

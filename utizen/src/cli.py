@@ -7,9 +7,10 @@ import click
 import glob
 import pick
 from pprint import pformat
-from utizen import run, add_privilege_to_config
-from utils import *
-import lg_packager
+import utizen.src.tizen_packager as tizen_packager
+
+import utizen.src.lg_packager as lg_packager
+from utizen.src.utils import *
 
 
 @click.group()
@@ -20,9 +21,12 @@ def cli():
 @click.argument('config', type=click.STRING, autocompletion=get_configs_names_autocomplete, metavar='<config name>')
 @click.option('--TIZEN/--LG', default=True)
 def install(config, tizen):
+    _install(config, tizen)
+
+def _install(config, tizen):
     ip, port = get_connected_tv_ip_port()
     if tizen:
-        run(config, ip, port)
+        tizen_packager.run(config, ip, port)
     else:
         print("LG installation wip")
         lg_packager.run(config)
@@ -111,7 +115,7 @@ def set_privileges(config):
     if not click.confirm(""):
         click.secho("Aborted", bg='black', fg='white')
     else:
-        add_privilege_to_config(config, privileges)
+        tizen_packager.add_privilege_to_config(config, privileges)
         click.echo("{} privileges set to {}".format(len(privileges), config))
 
 @cli.command()
